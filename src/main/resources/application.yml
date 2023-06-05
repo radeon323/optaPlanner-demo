@@ -1,0 +1,14 @@
+optaplanner:
+  solver:
+    termination:
+      spent-limit: 30s
+  benchmark:
+    solver:
+      termination:
+        spent-limit: 15s
+
+logging:
+  level:
+    org.optaplanner: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %clr(${LOG_LEVEL_PATTERN:%5p}) %blue([%-15.15t]) %m%n"
