@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 public class Customer {
     private long id;
-    private MapPoint location;
+    private MapPoint mapPoint;
     private int demand;
 
     @Override

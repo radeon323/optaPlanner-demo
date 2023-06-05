@@ -125,20 +125,20 @@ public class DemoDataBuilder {
 
         PrimitiveIterator.OfInt depotRandom = random.ints(0, depotCount).iterator();
 
-        Supplier<Depot> depotSupplier = () -> new Depot(
+        Supplier<Store> depotSupplier = () -> new Store(
                 sequenceDepot.incrementAndGet(),
                 new MapPoint(sequenceDepot.incrementAndGet(), latitudes.nextDouble(), longitudes.nextDouble()));
 
-        List<Depot> depotList = Stream.generate(depotSupplier)
+        List<Store> storeList = Stream.generate(depotSupplier)
                 .limit(depotCount)
                 .collect(Collectors.toList());
 
-        Supplier<Vehicle> vehicleSupplier = () -> new Vehicle(
+        Supplier<Car> vehicleSupplier = () -> new Car(
                 sequenceVehicle.incrementAndGet(),
                 vehicleCapacity,
-                depotList.get(depotRandom.nextInt()));
+                storeList.get(depotRandom.nextInt()));
 
-        List<Vehicle> vehicleList = Stream.generate(vehicleSupplier)
+        List<Car> carList = Stream.generate(vehicleSupplier)
                 .limit(vehicleCount)
                 .collect(Collectors.toList());
 
@@ -152,13 +152,13 @@ public class DemoDataBuilder {
                 .collect(Collectors.toList());
 
         List<MapPoint> locationList = Stream.concat(
-                        customerList.stream().map(Customer::getLocation),
-                        depotList.stream().map(Depot::getLocation))
+                        customerList.stream().map(Customer::getMapPoint),
+                        storeList.stream().map(Store::getMapPoint))
                 .collect(Collectors.toList());
 
         distanceCalculator.initDistanceMaps(locationList);
 
         return new RoutingSolution(name, locationList,
-                depotList, vehicleList, customerList, southWestCorner, northEastCorner);
+                storeList, carList, customerList, southWestCorner, northEastCorner);
     }
 }

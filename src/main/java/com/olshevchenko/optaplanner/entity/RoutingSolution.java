@@ -28,10 +28,10 @@ public class RoutingSolution {
     private List<MapPoint> locationList;
 
     @ProblemFactCollectionProperty
-    private List<Depot> depotList;
+    private List<Store> storeList;
 
     @PlanningEntityCollectionProperty
-    private List<Vehicle> vehicleList;
+    private List<Car> carList;
 
     @ProblemFactCollectionProperty
     @ValueRangeProvider
@@ -45,15 +45,15 @@ public class RoutingSolution {
 
     public RoutingSolution(String name,
                            List<MapPoint> locationList,
-                           List<Depot> depotList,
-                           List<Vehicle> vehicleList,
+                           List<Store> storeList,
+                           List<Car> carList,
                            List<Customer> customerList,
                            MapPoint southWestCorner,
                            MapPoint northEastCorner) {
         this.name = name;
         this.locationList = locationList;
-        this.depotList = depotList;
-        this.vehicleList = vehicleList;
+        this.storeList = storeList;
+        this.carList = carList;
         this.customerList = customerList;
         this.southWestCorner = southWestCorner;
         this.northEastCorner = northEastCorner;

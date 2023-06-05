@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="/webjars/leaflet/leaflet.css">
   <link rel="stylesheet" href="/webjars/font-awesome/css/all.min.css">
 
-  <title>Vehicle Routing - OptaPlanner Quarkus</title>
+  <title>Car Routing - OptaPlanner Quarkus</title>
 </head>
 <body>
 
@@ -51,7 +51,7 @@
           </table>
         </div>
         <div class="col">
-          <h5>Depot list</h5>
+          <h5>Stores list</h5>
           <table class="table-sm w-100">
             <thead>
             <tr>
@@ -59,11 +59,11 @@
               <th class="col-11">Name</th>
             </tr>
             </thead>
-            <tbody id="depots"></tbody>
+            <tbody id="stores"></tbody>
           </table>
         </div>
         <div class="col">
-          <h5>Vehicles list</h5>
+          <h5>Cars list</h5>
           <table class="table-sm w-100">
             <thead>
             <tr>
@@ -72,12 +72,12 @@
               <th class="col-3">
                 Load
                 <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" data-html="true"
-                   title="Vehicle load is displayed as <em>total cargo / vehicle capacity</em>."></i>
+                   title="Car load is displayed as <em>total cargo / car capacity</em>."></i>
               </th>
               <th class="col-3">Distance</th>
             </tr>
             </thead>
-            <tbody id="vehicles"></tbody>
+            <tbody id="cars"></tbody>
           </table>
         </div>
       </div>

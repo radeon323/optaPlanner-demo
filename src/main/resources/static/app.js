@@ -20,17 +20,17 @@ let autoRefreshCount = 0;
 let autoRefreshIntervalId = null;
 
 let initialized = false;
-const depotByIdMap = new Map();
+const storeByIdMap = new Map();
 const customerByIdMap = new Map();
 
 const solveButton = $('#solveButton');
 const stopSolvingButton = $('#stopSolvingButton');
-const vehiclesTable = $('#vehicles');
-const depotsTable = $('#depots');
+const carsTable = $('#cars');
+const storesTable = $('#stores');
 
 const colorById = (i) => colors[i % colors.length];
-const colorByVehicle = (vehicle) => vehicle === null ? null : colorById(vehicle.id);
-const colorByDepot = (depot) => depot === null ? null : colorById(depot.id);
+const colorByCar = (car) => car === null ? null : colorById(car.id);
+const colorByStore = (store) => store === null ? null : colorById(store.id);
 
 const defaultIcon = new L.Icon.Default();
 const greyIcon = new L.Icon({
@@ -156,7 +156,7 @@ const autoRefresh = () => {
   }
 };
 
-const depotPopupContent = (depot, color) => `<h5>Depot ${depot.id}</h5>
+const storePopupContent = (store, color) => `<h5>Store ${store.id}</h5>
 <ul class="list-unstyled">
 <li><span style="background-color: ${color}; display: inline-block; width: 12px; height: 12px; text-align: center">
 </span> ${color}</li>
@@ -165,14 +165,14 @@ const depotPopupContent = (depot, color) => `<h5>Depot ${depot.id}</h5>
 const customerPopupContent = (customer) => `<h5>Customer ${customer.id}</h5>
 Demand: ${customer.demand}`;
 
-const getDepotMarker = ({ id, mapPoint }) => {
-  let marker = depotByIdMap.get(id);
+const getStoreMarker = ({ id, mapPoint }) => {
+  let marker = storeByIdMap.get(id);
   if (marker) {
     return marker;
   }
   marker = L.marker(mapPoint);
-  marker.addTo(depotGroup).bindPopup();
-  depotByIdMap.set(id, marker);
+  marker.addTo(storeGroup).bindPopup();
+  storeByIdMap.set(id, marker);
   return marker;
 };
 
@@ -192,22 +192,22 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
     initialized = true;
     map.fitBounds(solution.bounds);
   }
-  // Vehicles
+  // Cars
   $('[data-toggle="tooltip-load"]').tooltip('dispose');
-  vehiclesTable.children().remove();
-  solution.vehicleList.forEach((vehicle) => {
-    const { id, capacity, totalDemand, totalDistanceMeters } = vehicle;
+  carsTable.children().remove();
+  solution.carList.forEach((car) => {
+    const { id, capacity, totalDemand, totalDistanceMeters } = car;
     const percentage = totalDemand / capacity * 100;
-    const color = colorByVehicle(vehicle);
+    const color = colorByCar(car);
     const colorIfUsed = color;
-    vehiclesTable.append(`
+    carsTable.append(`
       <tr>
         <td>
           <i class="fas fa-crosshairs" id="crosshairs-${id}"
             style="background-color: ${colorIfUsed}; display: inline-block; width: 1rem; height: 1rem; text-align: center">
           </i>
         </td>
-        <td>Vehicle ${id}</td>
+        <td>Car ${id}</td>
         <td>
           <div class="progress" data-toggle="tooltip-load" data-placement="left" data-html="true"
             title="Cargo: ${totalDemand}<br/>Capacity: ${capacity}">
@@ -218,19 +218,19 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
       </tr>`);
   });
   $('[data-toggle="tooltip-load"]').tooltip();
-  // Depots
-  depotsTable.children().remove();
-  solution.depotList.forEach((depot) => {
-    const { id } = depot;
-    const color = colorByDepot(depot);
+  // Stores
+  storesTable.children().remove();
+  solution.storeList.forEach((store) => {
+    const { id } = store;
+    const color = colorByStore(store);
     const icon = defaultIcon;
-    const marker = getDepotMarker(depot);
+    const marker = getStoreMarker(store);
     marker.setIcon(icon);
-    marker.setPopupContent(depotPopupContent(depot, color));
-    depotsTable.append(`<tr>
+    marker.setPopupContent(storePopupContent(store, color));
+    storesTable.append(`<tr>
       <td><i class="fas fa-crosshairs" id="crosshairs-${id}"
       style="background-color: ${color}; display: inline-block; width: 1rem; height: 1rem; text-align: center">
-      </i></td><td>Depot ${id}</td>
+      </i></td><td>Store ${id}</td>
       </tr>`);
   });
   // Customers
@@ -239,8 +239,8 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
   });
   // Route
   routeGroup.clearLayers();
-  solution.vehicleList.forEach((vehicle) => {
-    L.polyline(vehicle.route, { color: colorByVehicle(vehicle) }).addTo(routeGroup);
+  solution.carList.forEach((car) => {
+    L.polyline(car.route, { color: colorByCar(car) }).addTo(routeGroup);
   });
 
   // Summary
@@ -259,7 +259,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 const customerGroup = L.layerGroup().addTo(map);
-const depotGroup = L.layerGroup().addTo(map);
+const storeGroup = L.layerGroup().addTo(map);
 const routeGroup = L.layerGroup().addTo(map);
 
 solveButton.click(solve);

@@ -14,19 +14,19 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @PlanningEntity
-public class Vehicle {
+public class Car {
 
     private long id;
     private int capacity;
-    private Depot depot;
+    private Store store;
 
     @PlanningListVariable
     private List<Customer> customerList;
 
-    public Vehicle(long id, int capacity, Depot depot) {
+    public Car(long id, int capacity, Store store) {
         this.id = id;
         this.capacity = capacity;
-        this.depot = depot;
+        this.store = store;
         this.customerList = new ArrayList<>();
     }
 
@@ -40,11 +40,11 @@ public class Vehicle {
 
         List<MapPoint> route = new ArrayList<>();
 
-        route.add(depot.getLocation());
+        route.add(store.getMapPoint());
         for (Customer customer : customerList) {
-            route.add(customer.getLocation());
+            route.add(customer.getMapPoint());
         }
-        route.add(depot.getLocation());
+        route.add(store.getMapPoint());
 
         return route;
     }
@@ -63,13 +63,13 @@ public class Vehicle {
         }
 
         long totalDistance = 0;
-        MapPoint previousLocation = depot.getLocation();
+        MapPoint previousLocation = store.getMapPoint();
 
         for (Customer customer : customerList) {
-            totalDistance += previousLocation.getDistanceTo(customer.getLocation());
-            previousLocation = customer.getLocation();
+            totalDistance += previousLocation.getDistanceTo(customer.getMapPoint());
+            previousLocation = customer.getMapPoint();
         }
-        totalDistance += previousLocation.getDistanceTo(depot.getLocation());
+        totalDistance += previousLocation.getDistanceTo(store.getMapPoint());
 
         return totalDistance;
     }

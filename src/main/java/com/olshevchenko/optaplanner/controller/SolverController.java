@@ -1,7 +1,7 @@
 package com.olshevchenko.optaplanner.controller;
 
 import com.olshevchenko.optaplanner.entity.RoutingSolution;
-import com.olshevchenko.optaplanner.repository.VehicleRoutingSolutionRepository;
+import com.olshevchenko.optaplanner.repository.RoutingSolutionRepository;
 import lombok.RequiredArgsConstructor;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.solver.SolutionManager;
@@ -20,7 +20,7 @@ public class SolverController {
 
     private final AtomicReference<Throwable> solverError = new AtomicReference<>();
 
-    private final VehicleRoutingSolutionRepository repository;
+    private final RoutingSolutionRepository repository;
     private final SolverManager<RoutingSolution, Long> solverManager;
     private final SolutionManager<RoutingSolution, HardSoftLongScore> solutionManager;
 

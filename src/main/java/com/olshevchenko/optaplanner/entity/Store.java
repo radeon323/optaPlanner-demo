@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class Depot {
+public class Store {
     private final long id;
-    private final MapPoint location;
+    private final MapPoint mapPoint;
 }

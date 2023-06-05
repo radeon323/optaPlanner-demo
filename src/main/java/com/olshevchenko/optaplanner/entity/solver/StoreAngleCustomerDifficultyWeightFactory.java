@@ -1,7 +1,7 @@
 package com.olshevchenko.optaplanner.entity.solver;
 
 import com.olshevchenko.optaplanner.entity.Customer;
-import com.olshevchenko.optaplanner.entity.Depot;
+import com.olshevchenko.optaplanner.entity.Store;
 import com.olshevchenko.optaplanner.entity.RoutingSolution;
 import org.optaplanner.core.impl.heuristic.selector.common.decorator.SelectionSorterWeightFactory;
 
@@ -13,15 +13,15 @@ import static java.util.Comparator.comparingLong;
 /**
  * On large datasets, the constructed solution looks like pizza slices.
  */
-public class DepotAngleCustomerDifficultyWeightFactory implements SelectionSorterWeightFactory<RoutingSolution, Customer> {
+public class StoreAngleCustomerDifficultyWeightFactory implements SelectionSorterWeightFactory<RoutingSolution, Customer> {
 
     @Override
     public DepotAngleCustomerDifficultyWeight createSorterWeight(RoutingSolution routingSolution, Customer customer) {
-        Depot depot = routingSolution.getDepotList().get(0);
+        Store store = routingSolution.getStoreList().get(0);
         return new DepotAngleCustomerDifficultyWeight(customer,
-                customer.getLocation().getAngle(depot.getLocation()),
-                customer.getLocation().getDistanceTo(depot.getLocation())
-                        + depot.getLocation().getDistanceTo(customer.getLocation()));
+                customer.getMapPoint().getAngle(store.getMapPoint()),
+                customer.getMapPoint().getDistanceTo(store.getMapPoint())
+                        + store.getMapPoint().getDistanceTo(customer.getMapPoint()));
     }
 
     public static class DepotAngleCustomerDifficultyWeight

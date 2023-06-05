@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public class VehicleRoutingSolutionRepository {
+public class RoutingSolutionRepository {
 
     private RoutingSolution routingSolution;
 

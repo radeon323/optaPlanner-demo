@@ -2,7 +2,7 @@ package com.olshevchenko.optaplanner.bootstrap;
 
 import com.olshevchenko.optaplanner.entity.MapPoint;
 import com.olshevchenko.optaplanner.entity.RoutingSolution;
-import com.olshevchenko.optaplanner.repository.VehicleRoutingSolutionRepository;
+import com.olshevchenko.optaplanner.repository.RoutingSolutionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DemoDataGenerator {
 
-    private final VehicleRoutingSolutionRepository repository;
+    private final RoutingSolutionRepository repository;
 
     @EventListener(ApplicationReadyEvent.class)
     public void generateDemoData() {
