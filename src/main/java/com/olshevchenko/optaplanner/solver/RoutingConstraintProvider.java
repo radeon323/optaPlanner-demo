@@ -22,9 +22,9 @@ public class RoutingConstraintProvider implements ConstraintProvider {
 
     protected Constraint vehicleCapacity(ConstraintFactory factory) {
         return factory.forEach(Car.class)
-                .filter(car -> car.getTotalDemand() > car.getCapacity())
+                .filter(car -> car.getTotalDemand() > car.getTotalWeight())
                 .penalizeLong(HardSoftLongScore.ONE_HARD,
-                        car -> car.getTotalDemand() - car.getCapacity())
+                        car -> car.getTotalDemand() - car.getTotalWeight())
                 .asConstraint("vehicleCapacity");
     }
 

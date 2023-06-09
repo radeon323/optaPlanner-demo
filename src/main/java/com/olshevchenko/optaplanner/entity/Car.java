@@ -14,18 +14,19 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @PlanningEntity
+//Route
 public class Car {
 
     private long id;
-    private int capacity;
+    private int totalWeight;
     private Store store;
 
     @PlanningListVariable
     private List<Customer> customerList;
 
-    public Car(long id, int capacity, Store store) {
+    public Car(long id, int totalWeight, Store store) {
         this.id = id;
-        this.capacity = capacity;
+        this.totalWeight = totalWeight;
         this.store = store;
         this.customerList = new ArrayList<>();
     }
@@ -52,7 +53,7 @@ public class Car {
     public int getTotalDemand() {
         int totalDemand = 0;
         for (Customer customer : customerList) {
-            totalDemand += customer.getDemand();
+            totalDemand += customer.getAddressTotalWeight();
         }
         return totalDemand;
     }
