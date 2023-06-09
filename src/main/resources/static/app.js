@@ -1,5 +1,6 @@
 const colors = [
   'aqua',
+  'tomato',
   'aquamarine',
   'blue',
   'blueviolet',
@@ -13,8 +14,7 @@ const colors = [
   'maroon',
   'mediumvioletred',
   'orange',
-  'slateblue',
-  'tomato',
+  'slateblue'
 ];
 let autoRefreshCount = 0;
 let autoRefreshIntervalId = null;
@@ -170,7 +170,7 @@ const getStoreMarker = ({ id, mapPoint }) => {
   if (marker) {
     return marker;
   }
-  marker = L.marker(mapPoint);
+  marker = L.circleMarker(mapPoint, { radius: 2 });
   marker.addTo(storeGroup).bindPopup();
   storeByIdMap.set(id, marker);
   return marker;
@@ -181,16 +181,20 @@ const getCustomerMarker = ({ id, mapPoint }) => {
   if (marker) {
     return marker;
   }
-  marker = L.circleMarker(mapPoint);
+  marker = L.circleMarker(mapPoint, { radius: 1 });
   marker.addTo(customerGroup).bindPopup();
   customerByIdMap.set(id, marker);
   return marker;
 };
 
+
 const showProblem = ({ solution, scoreExplanation, isSolving }) => {
   if (!initialized) {
     initialized = true;
-    map.fitBounds(solution.bounds);
+    map.fitBounds([
+      [49.950243, 29.346807],
+      [50.874353, 31.799505]
+    ]);
   }
   // Cars
   $('[data-toggle="tooltip-load"]').tooltip('dispose');
@@ -223,9 +227,9 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
   solution.storeList.forEach((store) => {
     const { id } = store;
     const color = colorByStore(store);
-    const icon = defaultIcon;
+    // const icon = defaultIcon;
     const marker = getStoreMarker(store);
-    marker.setIcon(icon);
+    // marker.setIcon(icon);
     marker.setPopupContent(storePopupContent(store, color));
     storesTable.append(`<tr>
       <td><i class="fas fa-crosshairs" id="crosshairs-${id}"
@@ -237,11 +241,129 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
   solution.customerList.forEach((customer) => {
     getCustomerMarker(customer).setPopupContent(customerPopupContent(customer));
   });
+
+
   // Route
   routeGroup.clearLayers();
-  solution.carList.forEach((car) => {
-    L.polyline(car.route, { color: colorByCar(car) }).addTo(routeGroup);
+
+// Підключення до API GraphHopper
+  const GH_API_KEY = '28656985-1f90-4553-98b5-593ae4add77e';
+  const GH_API_URL = `https://graphhopper.com/api/1/route`;
+
+  // solution.carList.forEach((car) => {
+  //   L.polyline(car.route, { color: colorByCar(car) }).addTo(routeGroup);
+  // });
+
+  // solution.carList.forEach((car) => {
+  //   const color = colorByCar(car);
+  //   car.route.slice(0, -1).forEach((point, index) => {
+  //     const marker = L.circleMarker(point, { color: color, fillColor: color }).addTo(routeGroup);
+  //     marker.setRadius(5);
+  //     marker.bindTooltip(String(index + 1), { permanent: true, className: 'route-marker-label' });
+  //   });
+  // });
+
+
+  function decodeCoordinates(encodedCoordinates) {
+    const coordinates = [];
+    let index = 0;
+    let lat = 0;
+    let lng = 0;
+
+    while (index < encodedCoordinates.length) {
+      let shift = 0;
+      let result = 0;
+      let byte;
+
+      do {
+        byte = encodedCoordinates.charCodeAt(index++) - 63;
+        result |= (byte & 0x1f) << shift;
+        shift += 5;
+      } while (byte >= 0x20);
+
+      const deltaLat = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lat += deltaLat;
+
+      shift = 0;
+      result = 0;
+
+      do {
+        byte = encodedCoordinates.charCodeAt(index++) - 63;
+        result |= (byte & 0x1f) << shift;
+        shift += 5;
+      } while (byte >= 0x20);
+
+      const deltaLng = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lng += deltaLng;
+
+      const decodedCoordinate = [lat * 1e-5, lng * 1e-5];
+      coordinates.push(decodedCoordinate);
+    }
+
+    return coordinates;
+  }
+
+  // solution.carList.forEach(async (car) => {
+  //   const coordinates = [];
+  //   for (let i = 0; i < car.route.length - 1; i++) {
+  //     const startPoint = car.route[i];
+  //     const endPoint = car.route[i + 1];
+  //     const response = await fetch(`${GH_API_URL}?point=${startPoint[0]},${startPoint[1]}&point=${endPoint[0]},${endPoint[1]}&vehicle=car&key=${GH_API_KEY}`);
+  //     const data = await response.json();
+  //     const routeCoordinates = data.paths[0].points;
+  //     const decodedPoints = decodeCoordinates(routeCoordinates);
+  //     coordinates.push(...decodedPoints);
+  //   }
+  //   L.polyline(coordinates, { color: colorByCar(car) }).addTo(routeGroup);
+  // });
+
+
+  solution.carList.forEach(async (car) => {
+      // const color = colorByCar(car);
+      // car.route.slice(0, -1).forEach((point, index) => {
+      //   const marker = L.circleMarker(point, { color: color, fillColor: color }).addTo(routeGroup);
+      //   marker.setRadius(5);
+      //   marker.bindTooltip(String(index + 1), { permanent: true, className: 'route-marker-label' });
+      // });
+
+    car.route.slice(0, -1).forEach((point, index) => {
+      const color = colorByCar(car); // Отримайте колір машини
+
+      const markerIcon = L.divIcon({
+        className: 'spike-marker',
+        html: `<div class="spike-icon" style="background-color: ${color}"></div>
+               <div class="marker-label">${index + 1}</div>`,
+        iconSize: [20, 40], // Задайте розміри шпильки тут
+        iconAnchor: [10, 40], // Задайте точку прив'язки шпильки тут
+      });
+
+      L.marker(point, {
+        icon: markerIcon,
+      }).addTo(routeGroup);
+    });
+
+
+
+
+
+    const coordinates = [];
+    for (let i = 0; i < car.route.length - 1; i++) {
+      const startPoint = car.route[i];
+      const endPoint = car.route[i + 1];
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      const response = await fetch(`${GH_API_URL}?point=${startPoint[0]},${startPoint[1]}&point=${endPoint[0]},${endPoint[1]}&vehicle=car&key=${GH_API_KEY}`);
+      const data = await response.json();
+      const routeCoordinates = data.paths[0].points;
+      const decodedPoints = decodeCoordinates(routeCoordinates);
+      coordinates.push(...decodedPoints);
+    }
+    L.polyline(coordinates, { color: colorByCar(car) }).addTo(routeGroup);
   });
+
+
+
 
   // Summary
   $('#score').text(solution.score);

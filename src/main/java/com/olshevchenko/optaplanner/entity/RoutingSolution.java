@@ -1,16 +1,17 @@
 package com.olshevchenko.optaplanner.entity;
 
-import com.olshevchenko.optaplanner.bootstrap.DemoDataBuilder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import com.olshevchenko.optaplanner.demo.DemoDataBuilder;
+import lombok.*;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
 import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
+import org.optaplanner.core.api.solver.SolverFactory;
+import org.optaplanner.core.config.score.director.ScoreDirectorFactoryConfig;
+import org.optaplanner.core.config.solver.SolverConfig;
+import org.optaplanner.core.config.solver.termination.TerminationConfig;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,43 +41,31 @@ public class RoutingSolution {
     @PlanningScore
     private HardSoftLongScore score;
 
-    private MapPoint southWestCorner;
-    private MapPoint northEastCorner;
-
     public RoutingSolution(String name,
                            List<MapPoint> locationList,
                            List<Store> storeList,
                            List<Car> carList,
-                           List<Customer> customerList,
-                           MapPoint southWestCorner,
-                           MapPoint northEastCorner) {
+                           List<Customer> customerList) {
         this.name = name;
         this.locationList = locationList;
         this.storeList = storeList;
         this.carList = carList;
         this.customerList = customerList;
-        this.southWestCorner = southWestCorner;
-        this.northEastCorner = northEastCorner;
     }
 
     public static RoutingSolution empty() {
         RoutingSolution problem = DemoDataBuilder.builder()
                 .setMinDemand(1)
                 .setMaxDemand(2)
-                .setVehicleCapacity(77).setCustomerCount(77).setVehicleCount(7).setDepotCount(1)
-                .setSouthWestCorner(new MapPoint(0L, 51.44, -0.16))
-                .setNorthEastCorner(new MapPoint(0L, 51.56, -0.01)).build();
+                .build();
 
         problem.setScore(HardSoftLongScore.ZERO);
 
         return problem;
     }
 
-    public List<MapPoint> getBounds() {
-        return Arrays.asList(southWestCorner, northEastCorner);
-    }
-
     public long getDistanceMeters() {
         return score == null ? 0 : -score.softScore();
     }
+
 }

@@ -12,3 +12,14 @@ logging:
     org.optaplanner: DEBUG
   pattern:
     console: "%d{HH:mm:ss.SSS} %clr(${LOG_LEVEL_PATTERN:%5p}) %blue([%-15.15t]) %m%n"
+
+graphhopper:
+  enabled: true
+  osm:
+    url: https://download.openstreetmap.fr/extracts/europe/ukraine/kiev_oblast-latest.osm.pbf
+    file: osm_file/kiev_oblast.osm.pbf
+    graph: osm_routing_graph
+  profiles:
+    name: car
+    vehicle: car
+    weighting: fastest
