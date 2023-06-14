@@ -1,9 +1,9 @@
 package com.olshevchenko.optaplanner.web;
 
+import com.olshevchenko.optaplanner.entity.Customer;
 import com.olshevchenko.optaplanner.entity.RoutingSolution;
 import com.olshevchenko.optaplanner.entity.Status;
-import com.olshevchenko.optaplanner.repository.RoutingSolutionRepository;
-import com.olshevchenko.optaplanner.utils.GraphHopperDistanceCalculator;
+import com.olshevchenko.optaplanner.service.DefaultRoutingSolutionService;
 import lombok.RequiredArgsConstructor;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.solver.SolutionManager;
@@ -20,10 +20,9 @@ public class SolverController {
 
     private static final long PROBLEM_ID = 0L;
     private final AtomicReference<Throwable> solverError = new AtomicReference<>();
-    private final RoutingSolutionRepository repository;
+    private final DefaultRoutingSolutionService routingSolutionService;
     private final SolverManager<RoutingSolution, Long> solverManager;
     private final SolutionManager<RoutingSolution, HardSoftLongScore> solutionManager;
-    private final GraphHopperDistanceCalculator distanceCalculator;
 
     private Status statusFromSolution(RoutingSolution solution) {
         return new Status(solution,
@@ -36,27 +35,15 @@ public class SolverController {
         Optional.ofNullable(solverError.getAndSet(null)).ifPresent(throwable -> {
             throw new RuntimeException("Solver failed", throwable);
         });
-
-        Optional<RoutingSolution> optionalRoutingSolution = repository.solution();
-
-        RoutingSolution routingSolution = optionalRoutingSolution.orElse(RoutingSolution.empty());
+        RoutingSolution routingSolution = routingSolutionService.getSolution();
         return statusFromSolution(routingSolution);
     }
 
-
     @PostMapping("/solve")
     public void solve() {
-        Optional<RoutingSolution> maybeSolution = repository.solution();
-
-        if (maybeSolution.isEmpty()) {
-            System.out.println("No solution found.");
-            return;
-        }
-
-        RoutingSolution solution = maybeSolution.get();
-//        distanceCalculator.initDistanceMaps(solution.getLocationList());
-        solverManager.solveAndListen(PROBLEM_ID, id -> solution,
-                solution1 -> repository.update(solution1), (problemId, throwable) -> solverError.set(throwable));
+        RoutingSolution routingSolution = routingSolutionService.getSolution();
+        solverManager.solveAndListen(PROBLEM_ID, id -> routingSolution,
+                solution1 -> routingSolutionService.update(solution1), (problemId, throwable) -> solverError.set(throwable));
     }
 
     @PostMapping("/stopSolving")

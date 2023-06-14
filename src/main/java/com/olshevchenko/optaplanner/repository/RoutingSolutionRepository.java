@@ -1,21 +1,35 @@
 package com.olshevchenko.optaplanner.repository;
 
-import com.olshevchenko.optaplanner.demo.DemoDataBuilder;
 import com.olshevchenko.optaplanner.entity.RoutingSolution;
+import com.olshevchenko.optaplanner.utils.GraphHopperDistanceCalculator;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 
 @Repository
 public class RoutingSolutionRepository {
 
+    private final GraphHopperDistanceCalculator distanceCalculator;
     private RoutingSolution routingSolution;
+
+    public RoutingSolutionRepository(GraphHopperDistanceCalculator distanceCalculator) {
+        this.distanceCalculator = distanceCalculator;
+    }
 
     public Optional<RoutingSolution> solution() {
         if (routingSolution == null) {
             generateDemoData();
         }
-        return Optional.ofNullable(routingSolution);
+
+        CompletableFuture.runAsync(() -> {
+            if (!routingSolution.isDistancesInitialized()) {
+                distanceCalculator.initDistanceMaps(routingSolution.getLocationList());
+                routingSolution.setDistancesInitialized(true);
+            }
+        });
+        return Optional.of(routingSolution);
     }
 
     public void update(RoutingSolution routingSolution) {
@@ -23,9 +37,6 @@ public class RoutingSolutionRepository {
     }
 
     private void generateDemoData() {
-        this.routingSolution = DemoDataBuilder.builder()
-                .setMinDemand(50)
-                .setMaxDemand(200)
-                .build();
+        this.routingSolution = DemoDataBuilder.builder().build();
     }
 }

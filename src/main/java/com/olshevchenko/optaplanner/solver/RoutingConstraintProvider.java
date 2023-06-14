@@ -1,6 +1,6 @@
 package com.olshevchenko.optaplanner.solver;
 
-import com.olshevchenko.optaplanner.entity.Car;
+import com.olshevchenko.optaplanner.entity.Route;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintFactory;
@@ -21,10 +21,10 @@ public class RoutingConstraintProvider implements ConstraintProvider {
     // ************************************************************************
 
     protected Constraint vehicleCapacity(ConstraintFactory factory) {
-        return factory.forEach(Car.class)
-                .filter(car -> car.getTotalDemand() > car.getTotalWeight())
+        return factory.forEach(Route.class)
+                .filter(route -> route.getTotalDemand() > route.getCar().getWeightCapacity())
                 .penalizeLong(HardSoftLongScore.ONE_HARD,
-                        car -> car.getTotalDemand() - car.getTotalWeight())
+                        route -> route.getTotalDemand() - route.getCar().getWeightCapacity())
                 .asConstraint("vehicleCapacity");
     }
 
@@ -33,9 +33,9 @@ public class RoutingConstraintProvider implements ConstraintProvider {
     // ************************************************************************
 
     protected Constraint totalDistance(ConstraintFactory factory) {
-        return factory.forEach(Car.class)
+        return factory.forEach(Route.class)
                 .penalizeLong(HardSoftLongScore.ONE_SOFT,
-                        Car::getTotalDistanceMeters)
+                        route -> route.getRouteDistanceDuration().getDistance())
                 .asConstraint("distanceFromPreviousStandstill");
     }
 }

@@ -25,11 +25,11 @@ const customerByIdMap = new Map();
 
 const solveButton = $('#solveButton');
 const stopSolvingButton = $('#stopSolvingButton');
-const carsTable = $('#cars');
+const routesTable = $('#routes');
 const storesTable = $('#stores');
 
 const colorById = (i) => colors[i % colors.length];
-const colorByCar = (car) => car === null ? null : colorById(car.id);
+const colorByCar = (route) => route === null ? null : colorById(route.id);
 const colorByStore = (store) => store === null ? null : colorById(store.id);
 
 const fetchHeaders = {
@@ -40,6 +40,15 @@ const fetchHeaders = {
 };
 
 const formatDistance = (distanceInMeters) => `${Math.floor(distanceInMeters / 1000)}km ${distanceInMeters % 1000}m`;
+
+const formatDuration = (durationInMillis) => {
+  const hours = Math.floor(durationInMillis / (1000 * 60 * 60));
+  const minutes = Math.floor((durationInMillis % (1000 * 60 * 60)) / (1000 * 60));
+  const formattedHours = hours.toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+  return formattedHours + ':' + formattedMinutes;
+}
+
 
 const getStatus = () => {
   fetch('/vrp/status', fetchHeaders)
@@ -186,17 +195,16 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
       [50.874353, 31.799505]
     ]);
   }
-  console.log(solution);
 
   // Cars
   $('[data-toggle="tooltip-load"]').tooltip('dispose');
-  carsTable.children().remove();
-  solution.carList.forEach((car) => {
-    const { id, totalWeight, totalDemand, totalDistanceMeters } = car;
-    const percentage = totalDemand / totalWeight * 100;
-    const color = colorByCar(car);
+  routesTable.children().remove();
+  solution.routeList.forEach((route) => {
+    const { id, car, totalDemand, routeDistanceDuration } = route;
+    const percentage = totalDemand / car.weightCapacity * 100;
+    const color = colorByCar(route);
     const colorIfUsed = color;
-    carsTable.append(`
+    routesTable.append(`
       <tr>
         <td>
           <i class="fas fa-crosshairs" id="crosshairs-${id}"
@@ -206,11 +214,12 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
         <td>Car ${id}</td>
         <td>
           <div class="progress" data-toggle="tooltip-load" data-placement="left" data-html="true"
-            title="Cargo: ${totalDemand}<br/>TotalWeight: ${totalWeight}">
-            <div class="progress-bar" role="progressbar" style="width: ${percentage}%">${totalDemand}/${totalWeight}</div>
+            title="Cargo: ${totalDemand}<br/>TotalWeight: ${car.weightCapacity}">
+            <div class="progress-bar" role="progressbar" style="width: ${percentage}%">${totalDemand}/${car.weightCapacity}</div>
           </div>
         </td>
-        <td>${formatDistance(totalDistanceMeters)}</td>
+        <td>${formatDistance(routeDistanceDuration.distance)}</td>
+        <td>${formatDuration(routeDistanceDuration.duration)}</td>
       </tr>`);
   });
   $('[data-toggle="tooltip-load"]').tooltip();
@@ -236,18 +245,79 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
 
 
   // Route
-  routeGroup.clearLayers();
+  routeForCarGroup.clearLayers();
 
-
-
-  // solution.carList.forEach((car) => {
-  //   L.polyline(car.route, { color: colorByCar(car) }).addTo(routeGroup);
+  // solution.routeList.forEach((route) => {
+  //   L.polyline(route.routeForCar, { color: colorByCar(route) }).addTo(routeForCarGroup);
   // });
 
 // Without API GraphHopper
-  solution.carList.forEach((car) => {
-    car.route.slice(0, -1).forEach((point, index) => {
-      const color = colorByCar(car);
+//   solution.routeList.forEach((route) => {
+//     route.routeForCar.slice(0, -1).forEach((point, index) => {
+//       const color = colorByCar(route);
+//
+//       const markerIcon = L.divIcon({
+//         className: 'spike-marker',
+//         html: `<div class="spike-icon" style="background-color: ${color}"></div>
+//                <div class="marker-label">${index + 1}</div>`,
+//         iconSize: [20, 40],
+//         iconAnchor: [10, 40],
+//       });
+//
+//       L.marker(point, {
+//         icon: markerIcon,
+//       }).addTo(routeForCarGroup);
+//     });
+//   });
+
+
+  // With API GraphHopper
+  const GH_API_KEY = '28656985-1f90-4553-98b5-593ae4add77e';
+  const GH_API_URL = `https://graphhopper.com/api/1/routeForCar`;
+
+  function decodeCoordinates(encodedCoordinates) {
+    const coordinates = [];
+    let index = 0;
+    let lat = 0;
+    let lng = 0;
+
+    while (index < encodedCoordinates.length) {
+      let shift = 0;
+      let result = 0;
+      let byte;
+
+      do {
+        byte = encodedCoordinates.charCodeAt(index++) - 63;
+        result |= (byte & 0x1f) << shift;
+        shift += 5;
+      } while (byte >= 0x20);
+
+      const deltaLat = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lat += deltaLat;
+
+      shift = 0;
+      result = 0;
+
+      do {
+        byte = encodedCoordinates.charCodeAt(index++) - 63;
+        result |= (byte & 0x1f) << shift;
+        shift += 5;
+      } while (byte >= 0x20);
+
+      const deltaLng = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lng += deltaLng;
+
+      const decodedCoordinate = [lat * 1e-5, lng * 1e-5];
+      coordinates.push(decodedCoordinate);
+    }
+
+    return coordinates;
+  }
+
+  solution.routeList.forEach(async (route) => {
+
+    route.routeForCar.slice(0, -1).forEach((point, index) => {
+      const color = colorByCar(route);
 
       const markerIcon = L.divIcon({
         className: 'spike-marker',
@@ -259,87 +329,24 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
 
       L.marker(point, {
         icon: markerIcon,
-      }).addTo(routeGroup);
+      }).addTo(routeForCarGroup);
     });
+
+    const coordinates = [];
+    for (let i = 0; i < route.routeForCar.length - 1; i++) {
+      const startPoint = route.routeForCar[i];
+      const endPoint = route.routeForCar[i + 1];
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      const response = await fetch(`${GH_API_URL}?point=${startPoint[0]},${startPoint[1]}&point=${endPoint[0]},${endPoint[1]}&vehicle=car&key=${GH_API_KEY}`);
+      const data = await response.json();
+      const routeForCarCoordinates = data.paths[0].points;
+      const decodedPoints = decodeCoordinates(routeForCarCoordinates);
+      coordinates.push(...decodedPoints);
+    }
+    L.polyline(coordinates, { color: colorByCar(route) }).addTo(routeForCarGroup);
   });
-
-
-  // With API GraphHopper
-  // const GH_API_KEY = '28656985-1f90-4553-98b5-593ae4add77e';
-  // const GH_API_URL = `https://graphhopper.com/api/1/route`;
-  //
-  // function decodeCoordinates(encodedCoordinates) {
-  //   const coordinates = [];
-  //   let index = 0;
-  //   let lat = 0;
-  //   let lng = 0;
-  //
-  //   while (index < encodedCoordinates.length) {
-  //     let shift = 0;
-  //     let result = 0;
-  //     let byte;
-  //
-  //     do {
-  //       byte = encodedCoordinates.charCodeAt(index++) - 63;
-  //       result |= (byte & 0x1f) << shift;
-  //       shift += 5;
-  //     } while (byte >= 0x20);
-  //
-  //     const deltaLat = (result & 1) ? ~(result >> 1) : (result >> 1);
-  //     lat += deltaLat;
-  //
-  //     shift = 0;
-  //     result = 0;
-  //
-  //     do {
-  //       byte = encodedCoordinates.charCodeAt(index++) - 63;
-  //       result |= (byte & 0x1f) << shift;
-  //       shift += 5;
-  //     } while (byte >= 0x20);
-  //
-  //     const deltaLng = (result & 1) ? ~(result >> 1) : (result >> 1);
-  //     lng += deltaLng;
-  //
-  //     const decodedCoordinate = [lat * 1e-5, lng * 1e-5];
-  //     coordinates.push(decodedCoordinate);
-  //   }
-  //
-  //   return coordinates;
-  // }
-  //
-  // solution.carList.forEach(async (car) => {
-  //
-  //   car.route.slice(0, -1).forEach((point, index) => {
-  //     const color = colorByCar(car);
-  //
-  //     const markerIcon = L.divIcon({
-  //       className: 'spike-marker',
-  //       html: `<div class="spike-icon" style="background-color: ${color}"></div>
-  //              <div class="marker-label">${index + 1}</div>`,
-  //       iconSize: [20, 40],
-  //       iconAnchor: [10, 40],
-  //     });
-  //
-  //     L.marker(point, {
-  //       icon: markerIcon,
-  //     }).addTo(routeGroup);
-  //   });
-  //
-  //   const coordinates = [];
-  //   for (let i = 0; i < car.route.length - 1; i++) {
-  //     const startPoint = car.route[i];
-  //     const endPoint = car.route[i + 1];
-  //
-  //     await new Promise((resolve) => setTimeout(resolve, 2000));
-  //
-  //     const response = await fetch(`${GH_API_URL}?point=${startPoint[0]},${startPoint[1]}&point=${endPoint[0]},${endPoint[1]}&vehicle=car&key=${GH_API_KEY}`);
-  //     const data = await response.json();
-  //     const routeCoordinates = data.paths[0].points;
-  //     const decodedPoints = decodeCoordinates(routeCoordinates);
-  //     coordinates.push(...decodedPoints);
-  //   }
-  //   L.polyline(coordinates, { color: colorByCar(car) }).addTo(routeGroup);
-  // });
 
 
 
@@ -360,7 +367,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const customerGroup = L.layerGroup().addTo(map);
 const storeGroup = L.layerGroup().addTo(map);
-const routeGroup = L.layerGroup().addTo(map);
+const routeForCarGroup = L.layerGroup().addTo(map);
 
 solveButton.click(solve);
 stopSolvingButton.click(stopSolving);

@@ -1,8 +1,6 @@
-package com.olshevchenko.optaplanner.demo;
+package com.olshevchenko.optaplanner.repository;
 
 import com.olshevchenko.optaplanner.entity.*;
-import com.olshevchenko.optaplanner.utils.DistanceCalculator;
-import com.olshevchenko.optaplanner.utils.EuclideanDistanceCalculator;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -10,65 +8,47 @@ import java.util.List;
 import java.util.PrimitiveIterator;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @NoArgsConstructor
 public class DemoDataBuilder {
-
     private static final AtomicLong sequence = new AtomicLong();
-    private final DistanceCalculator distanceCalculator = new EuclideanDistanceCalculator();
-    private int minDemand;
-    private int maxDemand;
 
     private final List<Store> storeList = new ArrayList<>();
-    private final List<Car> carList = new ArrayList<>();
+    private final List<Route> routeList = new ArrayList<>();
     private final List<Customer> customerList = new ArrayList<>();
-    
+    private final List<Car> carList = new ArrayList<>();
 
     public static DemoDataBuilder builder() {
         return new DemoDataBuilder();
     }
 
-    public DemoDataBuilder setMinDemand(int minDemand) {
-        this.minDemand = minDemand;
-        return this;
-    }
-
-    public DemoDataBuilder setMaxDemand(int maxDemand) {
-        this.maxDemand = maxDemand;
-        return this;
-    }
-    
-
     public RoutingSolution build() {
-        if (minDemand < 1) {
-            throw new IllegalStateException("minDemand (" + minDemand + ") must be greater than zero.");
-        }
-        if (maxDemand < 1) {
-            throw new IllegalStateException("maxDemand (" + maxDemand + ") must be greater than zero.");
-        }
-        if (minDemand >= maxDemand) {
-            throw new IllegalStateException("maxDemand (" + maxDemand + ") must be greater than minDemand ("
-                    + minDemand + ").");
-        }
 
         String name = "GrandeDolce";
 
-        Random random = new Random(0);
-        PrimitiveIterator.OfInt demand = random.ints(minDemand, maxDemand + 1).iterator();
+        PrimitiveIterator.OfInt demand = new Random(0).ints(25, 220).iterator();
         
         storeList.add(new Store(1, new MapPoint(1, 50.08, 29.89)));
 
-        Car car1 = new Car(sequence.incrementAndGet(), 650, storeList.get(0));
-        Car car2 = new Car(sequence.incrementAndGet(), 800, storeList.get(0));
-        Car car3 = new Car(sequence.incrementAndGet(), 800, storeList.get(0));
-        Car car4 = new Car(sequence.incrementAndGet(), 1100, storeList.get(0));
-        Car car5 = new Car(sequence.incrementAndGet(), 2000, storeList.get(0));
-        Car car6 = new Car(sequence.incrementAndGet(), 1900, storeList.get(0));
-        Car car7 = new Car(sequence.incrementAndGet(), 800, storeList.get(0));
-        carList.addAll(List.of(car1, car2, car3, car4, car5, car6, car7));
+        Car car1 = new Car(1,"Мерседес Віто Mersedes Vito", true, false,"АІ6399ЕР", 1100,9, false);
+        Car car2 = new Car(2,"Мерседес Віто Mersedes Vito", true, false,"АІ1649ЕР", 800,9, false);
+        Car car3 = new Car(3,"Mersedes-Benz 316 СDІ", true, false,"AI0992ЕР", 1450,11, false);
+        Car car4 = new Car(4,"Mersedes-Benz", true, true,"АІ6349HA", 800,11, false);
+        Car car5 = new Car(5,"Mersedes Vito", true, false,"АІ7860НА", 800,9, false);
+        Car car6 = new Car(6,"Mersedes-Benz Sprinter 513CDI", true, true,"AI3097OB", 2000,13, false);
+        Car car7 = new Car(7,"Renault Kangoo", true, false,"АІ3256КН", 650,6, false);
+        carList.addAll(List.of(car1,car2,car3,car4,car5,car6,car7));
+
+        Route route1 = new Route(1, car1, storeList.get(0));
+        Route route2 = new Route(2, car2, storeList.get(0));
+        Route route3 = new Route(3, car3, storeList.get(0));
+        Route route4 = new Route(4, car4, storeList.get(0));
+        Route route5 = new Route(5, car5, storeList.get(0));
+        Route route6 = new Route(6, car6, storeList.get(0));
+        Route route7 = new Route(7, car7, storeList.get(0));
+        routeList.addAll(List.of(route1, route2, route3, route4, route5, route6, route7));
 
         Customer customer1 = new Customer(sequence.incrementAndGet(), new MapPoint(sequence.incrementAndGet(), 50.1640041,30.673291), demand.nextInt());
         Customer customer2 = new Customer(sequence.incrementAndGet(), new MapPoint(sequence.incrementAndGet(), 50.4108479,30.6032353), demand.nextInt());
@@ -137,9 +117,7 @@ public class DemoDataBuilder {
                         storeList.stream().map(Store::getMapPoint))
                 .collect(Collectors.toList());
 
-        distanceCalculator.initDistanceMaps(locationList);
-
         return new RoutingSolution(name, locationList,
-                storeList, carList, customerList);
+                storeList, routeList, customerList);
     }
 }
