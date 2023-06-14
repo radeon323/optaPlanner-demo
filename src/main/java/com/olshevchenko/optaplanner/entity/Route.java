@@ -7,6 +7,7 @@ import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.PlanningListVariable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Getter
@@ -21,26 +22,26 @@ public class Route {
     @PlanningListVariable(valueRangeProviderRefs = {"routePointList"})
     private List<RoutePoint> routePointList;
 
+    private Map<Long, RouteDistanceDuration> distanceDurationMap;
 
     public Route(long id, Car car, Store store) {
         this.id = id;
         this.car = car;
         this.store = store;
         this.routePointList = new ArrayList<>();
+        this.distanceDurationMap = new ConcurrentHashMap<>();
     }
 
-    public List<MapPoint> getRouteForCar() {
+    public List<RoutePoint> getRouteForCar() {
         if (routePointList.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<MapPoint> route = new ArrayList<>();
-
-        route.add(store.getMapPoint());
-        routePointList.stream()
-                .map(RoutePoint::getMapPoint)
-                .forEach(route::add);
-        route.add(store.getMapPoint());
+        List<RoutePoint> route = new ArrayList<>();
+        RoutePoint storePoint = new RoutePoint(0, store.getMapPoint(), 0);
+        route.add(storePoint);
+        route.addAll(routePointList);
+        route.add(storePoint);
 
         return route;
     }
@@ -59,8 +60,10 @@ public class Route {
             return rdd;
         }
         MapPoint previousLocation = store.getMapPoint();
+        distanceDurationMap.put(0L, rdd);
         for (RoutePoint routePoint : routePointList) {
             appendRouteDistanceDuration(rdd, previousLocation, routePoint.getMapPoint());
+            distanceDurationMap.put(routePoint.getId(), rdd);
             previousLocation = routePoint.getMapPoint();
         }
         appendRouteDistanceDuration(rdd, previousLocation, store.getMapPoint());

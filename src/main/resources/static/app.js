@@ -317,8 +317,10 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
   solution.routeList.forEach(async (route) => {
 
     route.routeForCar.slice(0, -1).forEach((point, index) => {
-      const color = colorByCar(route);
+      const duration = formatDuration(route.distanceDurationMap[point.id].duration);
+      console.log(duration);
 
+      const color = colorByCar(route);
       const markerIcon = L.divIcon({
         className: 'spike-marker',
         html: `<div class="spike-icon" style="background-color: ${color}"></div>
@@ -327,15 +329,15 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
         iconAnchor: [10, 40],
       });
 
-      L.marker(point, {
+      L.marker(point.mapPoint, {
         icon: markerIcon,
       }).addTo(routeForCarGroup);
     });
 
     const coordinates = [];
     for (let i = 0; i < route.routeForCar.length - 1; i++) {
-      const startPoint = route.routeForCar[i];
-      const endPoint = route.routeForCar[i + 1];
+      const startPoint = route.routeForCar[i].mapPoint;
+      const endPoint = route.routeForCar[i + 1].mapPoint;
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
 

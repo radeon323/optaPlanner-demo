@@ -23,12 +23,12 @@ public class RoutingSolutionRepository {
             generateDemoData();
         }
 
-        CompletableFuture.runAsync(() -> {
-            if (!routingSolution.isDistancesInitialized()) {
+        if (!routingSolution.isDistancesInitialized()) {
+            CompletableFuture.runAsync(() -> {
                 distanceCalculator.initDistanceMaps(routingSolution.getLocationList());
                 routingSolution.setDistancesInitialized(true);
-            }
-        });
+            });
+        }
         return Optional.of(routingSolution);
     }
 

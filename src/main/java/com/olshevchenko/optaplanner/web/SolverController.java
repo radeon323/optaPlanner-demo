@@ -41,8 +41,16 @@ public class SolverController {
     @PostMapping("/solve")
     public void solve() {
         RoutingSolution routingSolution = routingSolutionService.getSolution();
+        while (!routingSolution.isDistancesInitialized()) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         solverManager.solveAndListen(PROBLEM_ID, id -> routingSolution,
-                solution1 -> routingSolutionService.update(solution1), (problemId, throwable) -> solverError.set(throwable));
+                solution -> routingSolutionService.update(solution), (problemId, throwable) -> solverError.set(throwable));
     }
 
     @PostMapping("/stopSolving")

@@ -12,7 +12,9 @@ public class RoutingConstraintProvider implements ConstraintProvider {
     public Constraint[] defineConstraints(ConstraintFactory factory) {
         return new Constraint[] {
                 vehicleCapacity(factory),
+                totalDuration(factory),
                 totalDistance(factory),
+                travelCost(factory)
         };
     }
 
@@ -28,6 +30,14 @@ public class RoutingConstraintProvider implements ConstraintProvider {
                 .asConstraint("vehicleCapacity");
     }
 
+    protected Constraint totalDuration(ConstraintFactory factory) {
+        return factory.forEach(Route.class)
+                .filter(route -> route.getRouteDistanceDuration().getDuration() > 4 * 60 * 60 * 1000 + 30 * 60 * 1000)
+                .penalizeLong(HardSoftLongScore.ONE_HARD,
+                        route -> route.getRouteDistanceDuration().getDuration() - 4 * 60 * 60 * 1000 + 30 * 60 * 1000)
+                .asConstraint("totalDuration");
+    }
+
     // ************************************************************************
     // Soft constraints
     // ************************************************************************
@@ -38,4 +48,12 @@ public class RoutingConstraintProvider implements ConstraintProvider {
                         route -> route.getRouteDistanceDuration().getDistance())
                 .asConstraint("distanceFromPreviousStandstill");
     }
+
+    protected Constraint travelCost(ConstraintFactory factory) {
+        return factory.forEach(Route.class)
+                .penalizeLong(HardSoftLongScore.ONE_SOFT,
+                        route -> route.getCar().getTravelCost())
+                .asConstraint("travelCost");
+    }
+
 }
