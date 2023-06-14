@@ -6,15 +6,14 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-// RoutePoint
-public class Customer {
+public class RoutePoint {
     private long id;
     private MapPoint mapPoint;
     private int addressTotalWeight;
 
     @Override
     public String toString() {
-        return "Customer{" +
+        return "RoutePoint{" +
                 "id=" + id +
                 '}';
     }

@@ -33,8 +33,8 @@ public class RoutingSolution {
     private List<Route> routeList;
 
     @ProblemFactCollectionProperty
-    @ValueRangeProvider(id = "customerList")
-    private List<Customer> customerList;
+    @ValueRangeProvider(id = "routePointList")
+    private List<RoutePoint> routePointList;
 
     @PlanningScore
     private HardSoftLongScore score;
@@ -44,12 +44,12 @@ public class RoutingSolution {
                            List<MapPoint> locationList,
                            List<Store> storeList,
                            List<Route> routeList,
-                           List<Customer> customerList) {
+                           List<RoutePoint> routePointList) {
         this.name = name;
         this.locationList = locationList;
         this.storeList = storeList;
         this.routeList = routeList;
-        this.customerList = customerList;
+        this.routePointList = routePointList;
     }
 
     public static RoutingSolution empty() {

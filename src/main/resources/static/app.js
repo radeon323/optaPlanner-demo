@@ -21,7 +21,7 @@ let autoRefreshIntervalId = null;
 
 let initialized = false;
 const storeByIdMap = new Map();
-const customerByIdMap = new Map();
+const routePointByIdMap = new Map();
 
 const solveButton = $('#solveButton');
 const stopSolvingButton = $('#stopSolvingButton');
@@ -161,8 +161,8 @@ const storePopupContent = (store, color) => `<h5>Store ${store.id}</h5>
 </span> ${color}</li>
 </ul>`;
 
-const customerPopupContent = (customer) => `<h5>Customer ${customer.id}</h5>
-AddressTotalWeight: ${customer.addressTotalWeight}`;
+const routePointPopupContent = (routePoint) => `<h5>Customer ${routePoint.id}</h5>
+AddressTotalWeight: ${routePoint.addressTotalWeight}`;
 
 const getStoreMarker = ({ id, mapPoint }) => {
   let marker = storeByIdMap.get(id);
@@ -176,13 +176,13 @@ const getStoreMarker = ({ id, mapPoint }) => {
 };
 
 const getCustomerMarker = ({ id, mapPoint }) => {
-  let marker = customerByIdMap.get(id);
+  let marker = routePointByIdMap.get(id);
   if (marker) {
     return marker;
   }
   marker = L.circleMarker(mapPoint, { radius: 1 });
-  marker.addTo(customerGroup).bindPopup();
-  customerByIdMap.set(id, marker);
+  marker.addTo(routePointGroup).bindPopup();
+  routePointByIdMap.set(id, marker);
   return marker;
 };
 
@@ -239,8 +239,8 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
       </tr>`);
   });
   // Customers
-  solution.customerList.forEach((customer) => {
-    getCustomerMarker(customer).setPopupContent(customerPopupContent(customer));
+  solution.routePointList.forEach((routePoint) => {
+    getCustomerMarker(routePoint).setPopupContent(routePointPopupContent(routePoint));
   });
 
 
@@ -273,7 +273,7 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
 
   // With API GraphHopper
   const GH_API_KEY = '28656985-1f90-4553-98b5-593ae4add77e';
-  const GH_API_URL = `https://graphhopper.com/api/1/routeForCar`;
+  const GH_API_URL = `https://graphhopper.com/api/1/route`;
 
   function decodeCoordinates(encodedCoordinates) {
     const coordinates = [];
@@ -365,7 +365,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
 }).addTo(map);
 
-const customerGroup = L.layerGroup().addTo(map);
+const routePointGroup = L.layerGroup().addTo(map);
 const storeGroup = L.layerGroup().addTo(map);
 const routeForCarGroup = L.layerGroup().addTo(map);
 

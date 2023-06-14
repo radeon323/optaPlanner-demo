@@ -18,27 +18,27 @@ public class Route {
     private Car car;
     private Store store;
 
-    @PlanningListVariable(valueRangeProviderRefs = {"customerList"})
-    private List<Customer> customerList;
+    @PlanningListVariable(valueRangeProviderRefs = {"routePointList"})
+    private List<RoutePoint> routePointList;
 
 
     public Route(long id, Car car, Store store) {
         this.id = id;
         this.car = car;
         this.store = store;
-        this.customerList = new ArrayList<>();
+        this.routePointList = new ArrayList<>();
     }
 
     public List<MapPoint> getRouteForCar() {
-        if (customerList.isEmpty()) {
+        if (routePointList.isEmpty()) {
             return Collections.emptyList();
         }
 
         List<MapPoint> route = new ArrayList<>();
 
         route.add(store.getMapPoint());
-        customerList.stream()
-                .map(Customer::getMapPoint)
+        routePointList.stream()
+                .map(RoutePoint::getMapPoint)
                 .forEach(route::add);
         route.add(store.getMapPoint());
 
@@ -47,21 +47,21 @@ public class Route {
 
     public int getTotalDemand() {
         int totalDemand = 0;
-        for (Customer customer : customerList) {
-            totalDemand += customer.getAddressTotalWeight();
+        for (RoutePoint routePoint : routePointList) {
+            totalDemand += routePoint.getAddressTotalWeight();
         }
         return totalDemand;
     }
 
     public RouteDistanceDuration getRouteDistanceDuration() {
         RouteDistanceDuration rdd = RouteDistanceDuration.builder().build();
-        if (customerList.isEmpty()) {
+        if (routePointList.isEmpty()) {
             return rdd;
         }
         MapPoint previousLocation = store.getMapPoint();
-        for (Customer customer : customerList) {
-            appendRouteDistanceDuration(rdd, previousLocation, customer.getMapPoint());
-            previousLocation = customer.getMapPoint();
+        for (RoutePoint routePoint : routePointList) {
+            appendRouteDistanceDuration(rdd, previousLocation, routePoint.getMapPoint());
+            previousLocation = routePoint.getMapPoint();
         }
         appendRouteDistanceDuration(rdd, previousLocation, store.getMapPoint());
         return rdd;

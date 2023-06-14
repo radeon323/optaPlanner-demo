@@ -1,6 +1,5 @@
 package com.olshevchenko.optaplanner.web;
 
-import com.olshevchenko.optaplanner.entity.Customer;
 import com.olshevchenko.optaplanner.entity.RoutingSolution;
 import com.olshevchenko.optaplanner.entity.Status;
 import com.olshevchenko.optaplanner.service.DefaultRoutingSolutionService;
