@@ -9,7 +9,7 @@ import lombok.*;
 public class RoutePoint {
     private long id;
     private MapPoint mapPoint;
-    private int addressTotalWeight;
+    private double addressTotalWeight;
 
     @Override
     public String toString() {

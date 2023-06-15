@@ -7,15 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PrimitiveIterator;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @NoArgsConstructor
 public class DemoDataBuilder {
-    private final List<Store> storeList = new ArrayList<>();
-    private final List<Route> routeList = new ArrayList<>();
     private final List<RoutePoint> routePointList = new ArrayList<>();
-    private final List<Car> carList = new ArrayList<>();
 
     public static DemoDataBuilder builder() {
         return new DemoDataBuilder();
@@ -26,28 +21,6 @@ public class DemoDataBuilder {
         String name = "GrandeDolce";
 
         PrimitiveIterator.OfInt demand = new Random(0).ints(25, 220).iterator();
-        
-        storeList.add(new Store(1, new MapPoint(1, 50.08, 29.89)));
-
-        Car car1 = new Car(1,"Мерседес Віто Mersedes Vito", true, false,"АІ6399ЕР", 1100,9, false);
-        Car car2 = new Car(2,"Мерседес Віто Mersedes Vito", true, false,"АІ1649ЕР", 800,9, false);
-        Car car3 = new Car(3,"Mersedes-Benz 316 СDІ", true, false,"AI0992ЕР", 1450,11, false);
-        Car car4 = new Car(4,"Mersedes-Benz", true, true,"АІ6349HA", 800,11, false);
-        Car car5 = new Car(5,"Mersedes Vito", true, false,"АІ7860НА", 800,9, false);
-        Car car6 = new Car(6,"Mersedes-Benz Sprinter 513CDI", true, true,"AI3097OB", 2000,13, false);
-        Car car7 = new Car(7,"Mersedes-Benz Sprinter 314 CDI", true, false,"AI1060ОА", 2500,11, false);
-        Car car8 = new Car(8,"Renault Kangoo", true, false,"АІ3256КН", 650,6, false);
-        carList.addAll(List.of(car1, car2, car3, car4, car5, car6, car7, car8));
-
-        Route route1 = new Route(1, car1, storeList.get(0));
-        Route route2 = new Route(2, car2, storeList.get(0));
-        Route route3 = new Route(3, car3, storeList.get(0));
-        Route route4 = new Route(4, car4, storeList.get(0));
-        Route route5 = new Route(5, car5, storeList.get(0));
-        Route route6 = new Route(6, car6, storeList.get(0));
-        Route route7 = new Route(7, car7, storeList.get(0));
-        Route route8 = new Route(8, car8, storeList.get(0));
-        routeList.addAll(List.of(route1, route2, route3, route4, route5, route6, route7, route8));
 
         RoutePoint routePoint1 = new RoutePoint(2, new MapPoint(2, 50.1640041,30.673291), demand.nextInt());
         RoutePoint routePoint2 = new RoutePoint(3, new MapPoint(3, 50.4108479,30.6032353), demand.nextInt());
@@ -110,13 +83,6 @@ public class DemoDataBuilder {
                 routePoint31, routePoint32, routePoint33, routePoint34, routePoint35, routePoint36, routePoint37, routePoint38, routePoint39, routePoint40,
                 routePoint41, routePoint42, routePoint43, routePoint44, routePoint45, routePoint46, routePoint47, routePoint48, routePoint49, routePoint50));
 
-
-        List<MapPoint> locationList = Stream.concat(
-                        routePointList.stream().map(RoutePoint::getMapPoint),
-                        storeList.stream().map(Store::getMapPoint))
-                .collect(Collectors.toList());
-
-        return new RoutingSolution(name, locationList,
-                storeList, routeList, routePointList);
+        return new RoutingSolution(name, routePointList);
     }
 }

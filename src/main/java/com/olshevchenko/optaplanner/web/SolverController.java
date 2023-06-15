@@ -1,7 +1,7 @@
 package com.olshevchenko.optaplanner.web;
 
 import com.olshevchenko.optaplanner.entity.RoutingSolution;
-import com.olshevchenko.optaplanner.entity.Status;
+import com.olshevchenko.optaplanner.entity.SolutionInfo;
 import com.olshevchenko.optaplanner.service.DefaultRoutingSolutionService;
 import lombok.RequiredArgsConstructor;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.olshevchenko.optaplanner.entity.SolutionStatus.COMPLETE;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,14 +25,14 @@ public class SolverController {
     private final SolverManager<RoutingSolution, Long> solverManager;
     private final SolutionManager<RoutingSolution, HardSoftLongScore> solutionManager;
 
-    private Status statusFromSolution(RoutingSolution solution) {
-        return new Status(solution,
+    private SolutionInfo statusFromSolution(RoutingSolution solution) {
+        return new SolutionInfo(solution,
                 solutionManager.explain(solution).getSummary(),
                 solverManager.getSolverStatus(PROBLEM_ID));
     }
 
     @GetMapping("/status")
-    public Status status() {
+    public SolutionInfo status() {
         Optional.ofNullable(solverError.getAndSet(null)).ifPresent(throwable -> {
             throw new RuntimeException("Solver failed", throwable);
         });
@@ -41,7 +43,7 @@ public class SolverController {
     @PostMapping("/solve")
     public void solve() {
         RoutingSolution routingSolution = routingSolutionService.getSolution();
-        while (!routingSolution.isDistancesInitialized()) {
+        while (routingSolution.getStatus() != COMPLETE) {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -50,7 +52,7 @@ public class SolverController {
         }
 
         solverManager.solveAndListen(PROBLEM_ID, id -> routingSolution,
-                solution -> routingSolutionService.update(solution), (problemId, throwable) -> solverError.set(throwable));
+                routingSolutionService::update, (problemId, throwable) -> solverError.set(throwable));
     }
 
     @PostMapping("/stopSolving")

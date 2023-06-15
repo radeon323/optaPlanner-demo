@@ -6,9 +6,12 @@ import lombok.Setter;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.PlanningListVariable;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -16,42 +19,24 @@ import java.util.concurrent.TimeUnit;
 @PlanningEntity
 public class Route {
     private long id;
+    private double totalWeight;
+    private Integer totalPoints;
     private Car car;
     private Store store;
 
     @PlanningListVariable(valueRangeProviderRefs = {"routePointList"})
     private List<RoutePoint> routePointList;
 
-    private Map<Long, RouteDistanceDuration> distanceDurationMap;
+    private List<RoutePoint> fullRoutePoints;
 
-    public Route(long id, Car car, Store store) {
-        this.id = id;
-        this.car = car;
-        this.store = store;
-        this.routePointList = new ArrayList<>();
-        this.distanceDurationMap = new ConcurrentHashMap<>();
-    }
+    private Map<Long, RouteDistanceDuration> distanceDurationMap = new ConcurrentHashMap<>();
 
-    public List<RoutePoint> getRouteForCar() {
-        if (routePointList.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<RoutePoint> route = new ArrayList<>();
-        RoutePoint storePoint = new RoutePoint(0, store.getMapPoint(), 0);
-        route.add(storePoint);
-        route.addAll(routePointList);
-        route.add(storePoint);
-
-        return route;
-    }
-
-    public int getTotalDemand() {
-        int totalDemand = 0;
-        for (RoutePoint routePoint : routePointList) {
-            totalDemand += routePoint.getAddressTotalWeight();
-        }
-        return totalDemand;
+    public double getTotalWeight() {
+        double totalWeight = BigDecimal.valueOf(routePointList.stream()
+                        .map(RoutePoint::getAddressTotalWeight)
+                        .collect(Collectors.summarizingDouble(amount -> amount)).getSum())
+                .setScale(2, RoundingMode.HALF_UP).doubleValue();
+        return this.totalWeight = totalWeight;
     }
 
     public RouteDistanceDuration getRouteDistanceDuration() {
@@ -92,7 +77,7 @@ public class Route {
                 TimeUnit.MILLISECONDS.toMinutes(totalDuration) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(totalDuration)));
         return "Route{" +
                 "car=" + car.getName() +
-                ", Total weight=" + getTotalDemand() + "kg" +
+                ", Total weight=" + totalWeight + "kg" +
                 ", Total distance=" + getRouteDistanceDuration().getDistance() + "meters" +
                 ", Total duration=" + hm +
                 '}';

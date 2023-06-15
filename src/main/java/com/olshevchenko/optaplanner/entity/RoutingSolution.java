@@ -11,9 +11,13 @@ import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 
 import java.util.List;
 
+import static com.olshevchenko.optaplanner.entity.SolutionStatus.RAW;
+
 @Getter
 @Setter
 @ToString
+@Builder
+@AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
 @PlanningSolution
@@ -21,7 +25,7 @@ public class RoutingSolution {
 
     private String name;
 
-    private boolean isDistancesInitialized = false;
+    private SolutionStatus status = RAW;
 
     @ProblemFactCollectionProperty
     private List<MapPoint> locationList;
@@ -41,14 +45,8 @@ public class RoutingSolution {
 
 
     public RoutingSolution(String name,
-                           List<MapPoint> locationList,
-                           List<Store> storeList,
-                           List<Route> routeList,
                            List<RoutePoint> routePointList) {
         this.name = name;
-        this.locationList = locationList;
-        this.storeList = storeList;
-        this.routeList = routeList;
         this.routePointList = routePointList;
     }
 

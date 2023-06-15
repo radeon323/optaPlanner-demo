@@ -200,8 +200,8 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
   $('[data-toggle="tooltip-load"]').tooltip('dispose');
   routesTable.children().remove();
   solution.routeList.forEach((route) => {
-    const { id, car, totalDemand, routeDistanceDuration } = route;
-    const percentage = totalDemand / car.weightCapacity * 100;
+    const { id, car, totalWeight, routeDistanceDuration } = route;
+    const percentage = totalWeight / car.weightCapacity * 100;
     const color = colorByCar(route);
     const colorIfUsed = color;
     routesTable.append(`
@@ -214,8 +214,8 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
         <td>Car ${id}</td>
         <td>
           <div class="progress" data-toggle="tooltip-load" data-placement="left" data-html="true"
-            title="Cargo: ${totalDemand}<br/>TotalWeight: ${car.weightCapacity}">
-            <div class="progress-bar" role="progressbar" style="width: ${percentage}%">${totalDemand}/${car.weightCapacity}</div>
+            title="Cargo: ${totalWeight}<br/>TotalWeight: ${car.weightCapacity}">
+            <div class="progress-bar" role="progressbar" style="width: ${percentage}%">${totalWeight}/${car.weightCapacity}</div>
           </div>
         </td>
         <td>${formatDistance(routeDistanceDuration.distance)}</td>
@@ -245,15 +245,15 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
 
 
   // Route
-  routeForCarGroup.clearLayers();
+  fullRoutePointsGroup.clearLayers();
 
   // solution.routeList.forEach((route) => {
-  //   L.polyline(route.routeForCar, { color: colorByCar(route) }).addTo(routeForCarGroup);
+  //   L.polyline(route.fullRoutePoints, { color: colorByCar(route) }).addTo(fullRoutePointsGroup);
   // });
 
 // Without API GraphHopper
 //   solution.routeList.forEach((route) => {
-//     route.routeForCar.slice(0, -1).forEach((point, index) => {
+//     route.fullRoutePoints.slice(0, -1).forEach((point, index) => {
 //       const color = colorByCar(route);
 //
 //       const markerIcon = L.divIcon({
@@ -266,7 +266,7 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
 //
 //       L.marker(point, {
 //         icon: markerIcon,
-//       }).addTo(routeForCarGroup);
+//       }).addTo(fullRoutePointsGroup);
 //     });
 //   });
 
@@ -316,38 +316,40 @@ const showProblem = ({ solution, scoreExplanation, isSolving }) => {
 
   solution.routeList.forEach(async (route) => {
 
-    route.routeForCar.slice(0, -1).forEach((point, index) => {
-      const duration = formatDuration(route.distanceDurationMap[point.id].duration);
-      console.log(duration);
+    route.fullRoutePoints.slice(0, -1).forEach((point, index) => {
+      // const duration = formatDuration(route.distanceDurationMap[point.id].duration);
+      // console.log(duration);
 
       const color = colorByCar(route);
       const markerIcon = L.divIcon({
         className: 'spike-marker',
-        html: `<div class="spike-icon" style="background-color: ${color}"></div>
-               <div class="marker-label">${index + 1}</div>`,
+        html: `
+                <div class="spike-icon" style="background-color: ${color}"></div>
+                <div class="marker-label">${index + 1}</div>
+                `,
         iconSize: [20, 40],
         iconAnchor: [10, 40],
       });
 
       L.marker(point.mapPoint, {
         icon: markerIcon,
-      }).addTo(routeForCarGroup);
+      }).addTo(fullRoutePointsGroup);
     });
 
     const coordinates = [];
-    for (let i = 0; i < route.routeForCar.length - 1; i++) {
-      const startPoint = route.routeForCar[i].mapPoint;
-      const endPoint = route.routeForCar[i + 1].mapPoint;
+    for (let i = 0; i < route.fullRoutePoints.length - 1; i++) {
+      const startPoint = route.fullRoutePoints[i].mapPoint;
+      const endPoint = route.fullRoutePoints[i + 1].mapPoint;
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const response = await fetch(`${GH_API_URL}?point=${startPoint[0]},${startPoint[1]}&point=${endPoint[0]},${endPoint[1]}&vehicle=car&key=${GH_API_KEY}`);
       const data = await response.json();
-      const routeForCarCoordinates = data.paths[0].points;
-      const decodedPoints = decodeCoordinates(routeForCarCoordinates);
+      const fullRoutePointsCoordinates = data.paths[0].points;
+      const decodedPoints = decodeCoordinates(fullRoutePointsCoordinates);
       coordinates.push(...decodedPoints);
     }
-    L.polyline(coordinates, { color: colorByCar(route) }).addTo(routeForCarGroup);
+    L.polyline(coordinates, { color: colorByCar(route) }).addTo(fullRoutePointsGroup);
   });
 
 
@@ -369,7 +371,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const routePointGroup = L.layerGroup().addTo(map);
 const storeGroup = L.layerGroup().addTo(map);
-const routeForCarGroup = L.layerGroup().addTo(map);
+const fullRoutePointsGroup = L.layerGroup().addTo(map);
 
 solveButton.click(solve);
 stopSolvingButton.click(stopSolving);

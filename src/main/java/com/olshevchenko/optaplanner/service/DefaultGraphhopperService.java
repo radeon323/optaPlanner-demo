@@ -1,4 +1,4 @@
-package com.olshevchenko.optaplanner.utils;
+package com.olshevchenko.optaplanner.service;
 
 import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
@@ -12,7 +12,7 @@ import com.olshevchenko.optaplanner.entity.MapPoint;
 import com.olshevchenko.optaplanner.exception.RoutingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -23,9 +23,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-public class GraphHopperDistanceCalculator {
+public class DefaultGraphhopperService {
     public static final long METERS_PER_DEGREE = 111_000;
     private final GraphhopperProperties properties;
     private final GraphHopper hopper;
