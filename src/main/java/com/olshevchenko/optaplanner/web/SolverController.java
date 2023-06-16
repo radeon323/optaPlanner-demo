@@ -25,19 +25,19 @@ public class SolverController {
     private final SolverManager<RoutingSolution, Long> solverManager;
     private final SolutionManager<RoutingSolution, HardSoftLongScore> solutionManager;
 
-    private SolutionInfo statusFromSolution(RoutingSolution solution) {
+    private SolutionInfo infoFromSolution(RoutingSolution solution) {
         return new SolutionInfo(solution,
                 solutionManager.explain(solution).getSummary(),
                 solverManager.getSolverStatus(PROBLEM_ID));
     }
 
-    @GetMapping("/status")
-    public SolutionInfo status() {
+    @GetMapping("/info")
+    public SolutionInfo solutionInfo() {
         Optional.ofNullable(solverError.getAndSet(null)).ifPresent(throwable -> {
             throw new RuntimeException("Solver failed", throwable);
         });
         RoutingSolution routingSolution = routingSolutionService.getSolution();
-        return statusFromSolution(routingSolution);
+        return infoFromSolution(routingSolution);
     }
 
     @PostMapping("/solve")

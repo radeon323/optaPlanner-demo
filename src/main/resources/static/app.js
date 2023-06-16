@@ -51,10 +51,10 @@ const formatDuration = (durationInMillis) => {
 
 
 const getStatus = () => {
-  fetch('/vrp/status', fetchHeaders)
+  fetch('/vrp/info', fetchHeaders)
     .then((response) => {
       if (!response.ok) {
-        return handleErrorResponse('Get status failed', response);
+        return handleErrorResponse('Get info failed', response);
       } else {
         return response.json().then((data) => showProblem(data));
       }

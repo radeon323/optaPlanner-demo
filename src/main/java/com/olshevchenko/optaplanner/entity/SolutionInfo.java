@@ -1,12 +1,11 @@
 package com.olshevchenko.optaplanner.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.ToString;
 import org.optaplanner.core.api.solver.SolverStatus;
 
 @ToString
-public
-class SolutionInfo {
-
+public class SolutionInfo {
     public final RoutingSolution solution;
     public final String scoreExplanation;
     public final boolean isSolving;
