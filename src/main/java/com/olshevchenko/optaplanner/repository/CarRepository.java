@@ -1,17 +1,13 @@
-package com.olshevchenko.optaplanner.service;
+package com.olshevchenko.optaplanner.repository;
 
 import com.olshevchenko.optaplanner.entity.Car;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Slf4j
-@Service
-@RequiredArgsConstructor
-public class DefaultCarService {
+@Repository
+public class CarRepository {
     @Transactional(readOnly = true)
     public List<Car> findAll() {
         Car car1 = new Car(1,"Мерседес Віто Mersedes Vito", true, false,"АІ6399ЕР", 1100,9, false);

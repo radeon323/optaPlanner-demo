@@ -1,6 +1,7 @@
 package com.olshevchenko.optaplanner.service;
 
 import com.olshevchenko.optaplanner.entity.*;
+import com.olshevchenko.optaplanner.repository.CarRepository;
 import com.olshevchenko.optaplanner.repository.RoutingSolutionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ import static com.olshevchenko.optaplanner.entity.SolutionStatus.*;
 public class DefaultRoutingSolutionService {
     private final RoutingSolutionRepository repository;
     private final DefaultGraphhopperService graphhopperService;
-    private final DefaultCarService carService;
+    private final CarRepository carRepository;
     private final DefaultRouteCalculationService routeCalculationService;
     private final DefaultStoreService storeService;
 
@@ -41,7 +42,7 @@ public class DefaultRoutingSolutionService {
             routingSolution.setLocationList(locationList);
 
             List<Route> routeList = new ArrayList<>();
-            List<Car> carList = carService.findAll();
+            List<Car> carList = carRepository.findAll();
             for (Car car : carList) {
                 Route route = routeCalculationService.calculateRoutes(routingSolution, car);
                 routeList.add(route);
