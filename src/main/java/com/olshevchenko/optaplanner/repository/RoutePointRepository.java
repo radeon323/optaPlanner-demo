@@ -1,25 +1,23 @@
 package com.olshevchenko.optaplanner.repository;
 
-import com.olshevchenko.optaplanner.entity.*;
-import lombok.NoArgsConstructor;
+import com.olshevchenko.optaplanner.entity.MapPoint;
+import com.olshevchenko.optaplanner.entity.RoutePoint;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PrimitiveIterator;
 import java.util.Random;
 
-@NoArgsConstructor
-public class DemoDataBuilder {
-    private final List<RoutePoint> routePointList = new ArrayList<>();
+@Repository
+public class RoutePointRepository {
 
-    public static DemoDataBuilder builder() {
-        return new DemoDataBuilder();
-    }
-
-    public RoutingSolution build() {
-
-        String name = "GrandeDolce";
-
+    @Transactional
+    public List<RoutePoint> findAll() {
         PrimitiveIterator.OfInt demand = new Random(0).ints(25, 220).iterator();
 
         RoutePoint routePoint1 = new RoutePoint(2, new MapPoint(2, 50.1640041,30.673291), demand.nextInt());
@@ -77,12 +75,10 @@ public class DemoDataBuilder {
         RoutePoint routePoint49 = new RoutePoint(50, new MapPoint(50, 50.4648601,30.3263898), demand.nextInt());
         RoutePoint routePoint50 = new RoutePoint(51, new MapPoint(51, 50.4421405,30.288724), demand.nextInt());
 
-        routePointList.addAll(List.of(routePoint1, routePoint2, routePoint3, routePoint4, routePoint5, routePoint6, routePoint7, routePoint8, routePoint9, routePoint10,
+        return new ArrayList<>(List.of(routePoint1, routePoint2, routePoint3, routePoint4, routePoint5, routePoint6, routePoint7, routePoint8, routePoint9, routePoint10,
                 routePoint11, routePoint12, routePoint13, routePoint14, routePoint15, routePoint16, routePoint17, routePoint18, routePoint19, routePoint20,
                 routePoint21, routePoint22, routePoint23, routePoint24, routePoint25, routePoint26, routePoint27, routePoint28, routePoint29, routePoint30,
                 routePoint31, routePoint32, routePoint33, routePoint34, routePoint35, routePoint36, routePoint37, routePoint38, routePoint39, routePoint40,
                 routePoint41, routePoint42, routePoint43, routePoint44, routePoint45, routePoint46, routePoint47, routePoint48, routePoint49, routePoint50));
-
-        return new RoutingSolution(name, routePointList);
     }
 }

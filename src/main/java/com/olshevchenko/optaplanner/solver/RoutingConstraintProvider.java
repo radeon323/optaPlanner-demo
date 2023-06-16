@@ -31,10 +31,12 @@ public class RoutingConstraintProvider implements ConstraintProvider {
     }
 
     protected Constraint totalDuration(ConstraintFactory factory) {
+        // 4 hours 30 minutes
+        long driveTime = 4 * 60 * 60 * 1000 + 30 * 60 * 1000;
         return factory.forEach(Route.class)
-                .filter(route -> route.getRouteDistanceDuration().getDuration() > 4 * 60 * 60 * 1000 + 30 * 60 * 1000)
+                .filter(route -> route.getRouteDistanceDuration().getDuration() > driveTime)
                 .penalizeLong(HardSoftLongScore.ONE_HARD,
-                        route -> route.getRouteDistanceDuration().getDuration() - 4 * 60 * 60 * 1000 + 30 * 60 * 1000)
+                        route -> route.getRouteDistanceDuration().getDuration() - driveTime)
                 .asConstraint("totalDuration");
     }
 

@@ -1,6 +1,5 @@
 package com.olshevchenko.optaplanner.entity;
 
-import com.olshevchenko.optaplanner.repository.DemoDataBuilder;
 import lombok.*;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
@@ -48,14 +47,6 @@ public class RoutingSolution {
                            List<RoutePoint> routePointList) {
         this.name = name;
         this.routePointList = routePointList;
-    }
-
-    public static RoutingSolution empty() {
-        RoutingSolution problem = DemoDataBuilder.builder().build();
-
-        problem.setScore(HardSoftLongScore.ZERO);
-
-        return problem;
     }
 
     public long getDistanceMeters() {
