@@ -1,10 +1,13 @@
 package com.olshevchenko.optaplanner.solver;
 
 import com.olshevchenko.optaplanner.entity.Route;
+import com.olshevchenko.optaplanner.entity.RoutePoint;
 import org.optaplanner.core.api.score.buildin.hardsoftlong.HardSoftLongScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintFactory;
 import org.optaplanner.core.api.score.stream.ConstraintProvider;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RoutingConstraintProvider implements ConstraintProvider {
 

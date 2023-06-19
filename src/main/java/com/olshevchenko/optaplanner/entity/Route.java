@@ -1,5 +1,6 @@
 package com.olshevchenko.optaplanner.entity;
 
+import com.olshevchenko.optaplanner.solver.StoreAngleRoutePointDifficultyWeightFactory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @NoArgsConstructor
-@PlanningEntity
+@PlanningEntity(difficultyWeightFactoryClass = StoreAngleRoutePointDifficultyWeightFactory.class)
 public class Route {
     private long id;
     private double totalWeight;

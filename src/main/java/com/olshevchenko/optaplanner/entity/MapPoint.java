@@ -32,4 +32,15 @@ public class MapPoint {
         return routeDistanceDurationMap.get(mapPoint);
     }
 
+    public long getDistanceTo(MapPoint mapPoint) {
+        return routeDistanceDurationMap.get(mapPoint).getDistance();
+    }
+
+    public double getAngle(MapPoint mapPoint) {
+        // Euclidean distance (Pythagorean theorem) - not correct when the surface is a sphere
+        double latitudeDifference = mapPoint.latitude - latitude;
+        double longitudeDifference = mapPoint.longitude - longitude;
+        return Math.atan2(latitudeDifference, longitudeDifference);
+    }
+
 }
